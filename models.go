@@ -168,6 +168,7 @@ type respUserDetail struct {
 	Alias          string   `json:"alias"`
 	Status         int      `json:"status"`
 	QRCodeURL      string   `json:"qr_code"`
+	MainDepartment string   `json:"main_department"`
 	// TODO: extattr external_profile external_position
 }
 
