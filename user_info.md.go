@@ -36,6 +36,8 @@ type UserInfo struct {
 	//
 	// 扫描可添加为外部联系人
 	QRCodeURL string
+	// 主部门
+	MainDepartment int64
 }
 
 // UserGender 用户性别

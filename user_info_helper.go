@@ -40,18 +40,19 @@ func (x respUserDetail) intoUserInfo() UserInfo {
 	deptInfo := reshapeDeptInfo(x.DeptIDs, x.DeptOrder, x.IsLeaderInDept)
 
 	return UserInfo{
-		UserID:      x.UserID,
-		Name:        x.Name,
-		Position:    x.Position,
-		Departments: deptInfo,
-		Mobile:      x.Mobile,
-		Gender:      mustFromGenderStr(x.Gender),
-		Email:       x.Email,
-		AvatarURL:   x.AvatarURL,
-		Telephone:   x.Telephone,
-		IsEnabled:   x.IsEnabled != 0,
-		Alias:       x.Alias,
-		Status:      UserStatus(x.Status),
-		QRCodeURL:   x.QRCodeURL,
+		UserID:         x.UserID,
+		Name:           x.Name,
+		Position:       x.Position,
+		Departments:    deptInfo,
+		Mobile:         x.Mobile,
+		Gender:         mustFromGenderStr(x.Gender),
+		Email:          x.Email,
+		AvatarURL:      x.AvatarURL,
+		Telephone:      x.Telephone,
+		IsEnabled:      x.IsEnabled != 0,
+		Alias:          x.Alias,
+		Status:         UserStatus(x.Status),
+		QRCodeURL:      x.QRCodeURL,
+		MainDepartment: x.MainDepartment,
 	}
 }
