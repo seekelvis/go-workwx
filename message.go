@@ -132,12 +132,16 @@ func (c *WorkwxApp) SendNewsMessage(
 		recipient,
 		"news",
 		map[string]interface{}{
-			"title":       title,
-			"description": description, // TODO: 零值
-			"url":         url,
-			"picurl":      picURL, // TODO: 零值
-		}, isSafe,
-	)
+			// TODO: 支持发送多条图文
+			"articles": []interface{}{
+				map[string]interface{}{
+					"title":       title,
+					"description": description, // TODO: 零值
+					"url":         url,
+					"picurl":      picURL, // TODO: 零值
+				},
+			},
+		}, isSafe)
 }
 
 // SendMPNewsMessage 发送 mpnews 类型的图文消息
