@@ -90,6 +90,11 @@ func cmdSendMessage(c *cli.Context) error {
 			digest,
 			isSafe,
 		)
+	case "template_card_button":
+		err = app.SendTemplateCardButtonMessage(
+			&recipient,
+			content,
+		)
 	default:
 		fmt.Printf("unrecognized message type: %s\n", msgtype)
 		panic("unrecognized message type")
