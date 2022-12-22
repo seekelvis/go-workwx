@@ -4,6 +4,88 @@ import (
 	"errors"
 )
 
+type ButtonInteractionContent struct {
+	// Required
+	CardType        string           `json:"card_type"`
+	TaskId          string           `json:"task_id"`
+	Source          *Source          `json:"source"`
+	MainTitle       *MainTitle       `json:"main_title"`
+	ButtonSelection *ButtonSelection `json:"button_selection"`
+	ButtonList      []*ButtonList    `json:"button_list"`
+	// Optional
+	ActionMenu            *ActionMenu              `json:"action_menu"`
+	QuoteArea             *QuoteArea               `json:"quote_area"`
+	SubTitleText          string                   `json:"sub_title_text"`
+	HorizontalContentList []*HorizontalContentList `json:"horizontal_content_list"`
+	CardAction            *CardAction              `json:"card_action"`
+}
+
+type Source struct {
+	IconUrl   string `json:"icon_url"`
+	Desc      string `json:"desc"`
+	DescColor int    `json:"desc_color"` // 0(默认) 灰色，1 黑色，2 红色，3 绿色
+}
+
+type MainTitle struct {
+	Title string `json:"title"`
+	Desc  string `json:"desc"`
+}
+
+type ButtonSelection struct {
+	QuestionKey string                      `json:"question_key"`
+	Title       string                      `json:"title"`
+	OptionList  []ButtonSelectionOptionList `json:"option_list"`
+	SelectedId  string                      `json:"selected_id"`
+}
+
+type ButtonSelectionOptionList struct {
+	Id   string `json:"id"`
+	Text string `json:"text"`
+}
+
+type ButtonList struct {
+	Type  int    `json:"type"` // 0 或不填代表回调点击事件，1 代表跳转url
+	Text  string `json:"text"`
+	Key   string `json:"key"`
+	Style int    `json:"style"` // 按钮样式，目前可填1~4，不填或错填默认1
+	Url   string `json:"url"`   // 跳转事件的url，button_list.type是1时必填
+}
+
+type ActionMenu struct {
+	Desc       string                 `json:"desc"`
+	ActionList []ActionMenuActionList `json:"action_list"`
+}
+
+type ActionMenuActionList struct {
+	Text string `json:"text"`
+	Key  string `json:"key"`
+}
+
+type QuoteArea struct {
+	Type      int    `json:"type"` // 0或不填代表没有点击事件，1 代表跳转url，2 代表跳转小程序
+	Title     string `json:"title"`
+	QuoteText string `json:"quote_text"`
+	URL       string `json:"url"`      // 点击跳转的url，quote_area.type是1时必填
+	Appid     string `json:"appid"`    // 点击跳转的小程序的appid，必须是与当前应用关联的小程序，quote_area.type是2时必填
+	Pagepath  string `json:"pagepath"` // 点击跳转的小程序的pagepath，quote_area.type是2时选填
+}
+
+type HorizontalContentList struct {
+	Type    int    `json:"type"` // 链接类型，0或不填代表不是链接，1 代表跳转url，2 代表下载附件，3 代表点击跳转成员详情
+	Keyname string `json:"keyname"`
+	Value   string `json:"value"`
+	Url     string `json:"url"`      // 链接跳转的url，horizontal_content_list.type是1时必填
+	MediaId string `json:"media_id"` // 附件的media_id，horizontal_content_list.type是2时必填
+	Userid  string `json:"userid"`   // 成员详情的userid，horizontal_content_list.type是3时必填
+}
+
+type CardAction struct {
+	Type     int    `json:"type"`     // 跳转事件类型，0或不填代表不是链接，1 代表跳转url，2 代表打开小程序
+	Url      string `json:"url"`      // 跳转事件的url，card_action.type是1时必填
+	AppId    string `json:"app_id"`   // 跳转事件的小程序的appid，必须是与当前应用关联的小程序，card_action.type是2时必填
+	Pagepath string `json:"pagepath"` // 跳转事件的小程序的pagepath，card_action.type是2时选填
+}
+
 // SendTextMessage 发送文本消息
 //
 // 收件人参数如果仅设置了 `ChatID` 字段，则为【发送消息到群聊会话】接口调用；
@@ -196,104 +278,38 @@ func (c *WorkwxApp) SendMarkdownMessage(
 
 func (c *WorkwxApp) SendTemplateCardButtonMessage(
 	recipient *Recipient,
-	content string,
+	content ButtonInteractionContent,
+
 ) error {
+	body := map[string]interface{}{
+		"card_type":        "button_interaction",
+		"source":           content.Source,
+		"main_title":       content.MainTitle,
+		"task_id":          content.TaskId,
+		"button_selection": content.ButtonSelection,
+		"button_list":      content.ButtonList,
+	}
+	if content.ActionMenu != nil {
+		body["action_menu"] = content.ActionMenu
+	}
+	if content.QuoteArea != nil {
+		body["quote_area"] = content.QuoteArea
+	}
+	if content.SubTitleText != "" {
+		body["sub_title_text"] = content.SubTitleText
+	}
+	if content.HorizontalContentList != nil {
+		body["horizontal_content_list"] = content.HorizontalContentList
+	}
+	if content.CardAction != nil {
+		body["card_action"] = content.CardAction
+	}
+
 	return c.sendMessage(
 		recipient,
 		"template_card",
-		map[string]interface{}{
-			// TODO: 支持发送多条图文
-			"template_card": map[string]interface{}{
-				"card_type": "card_type",
-				"source": map[string]interface{}{
-					"icon_url":   "icon_url",
-					"desc":       "desc",
-					"desc_color": 1,
-				},
-				"action_menu": map[string]interface{}{
-					"desc": "desc",
-					"action_list": []interface{}{
-						map[string]interface{}{
-							"text": "接受推送",
-							"key":  "A",
-						},
-						map[string]interface{}{
-							"text": "拒绝推送",
-							"key":  "B",
-						},
-					},
-				},
-				"main_title": map[string]interface{}{
-					"title": "欢迎使用企业微信",
-					"desc":  "您的好友正在邀请您加入企业微信",
-				},
-				"quote_area": map[string]interface{}{
-					"type":       1,
-					"url":        "https://work.weixin.qq.com",
-					"title":      "企业微信的引用样式",
-					"quote_text": "企业微信真好用呀真好用",
-				},
-				"sub_title_text": "下载企业微信还能抢红包！",
-				"horizontal_content_list": []interface{}{
-					map[string]interface{}{
-						"keyname": "邀请人",
-						"value":   "张三",
-					},
-					map[string]interface{}{
-						"type":    1,
-						"keyname": "企业微信官网",
-						"value":   "点击访问",
-						"url":     "https://work.weixin.qq.com",
-					},
-					map[string]interface{}{
-						"type":     2,
-						"keyname":  "企业微信下载",
-						"value":    "企业微信.apk",
-						"media_id": "文件的media_id",
-					},
-					map[string]interface{}{
-						"type":    3,
-						"keyname": "员工信息",
-						"value":   "点击查看",
-						"userid":  "zhangsan",
-					},
-				},
-				"card_action": map[string]interface{}{
-					"type":     2,
-					"url":      "https://work.weixin.qq.com",
-					"appid":    "小程序的appid",
-					"pagepath": "/index.html",
-				},
-				"task_id": "task_id",
-				"button_selection": map[string]interface{}{
-					"question_key": "btn_question_key1",
-					"title":        "企业微信评分",
-					"option_list": []interface{}{
-						map[string]interface{}{
-							"id":   "btn_selection_id1",
-							"text": "100分",
-						},
-						map[string]interface{}{
-							"id":   "btn_selection_id2",
-							"text": "101分",
-						},
-					},
-					"selected_id": "btn_selection_id1",
-				},
-				"button_list": []interface{}{
-					map[string]interface{}{
-						"text":  "按钮1",
-						"style": 1,
-						"key":   "button_key_1",
-					},
-					map[string]interface{}{
-						"text":  "按钮2",
-						"style": 2,
-						"key":   "button_key_2",
-					},
-				},
-			},
-		}, false,
+		body,
+		false,
 	)
 }
 

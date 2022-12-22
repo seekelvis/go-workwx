@@ -123,6 +123,13 @@ func extractMessageExtras(common rxMessageCommon, body []byte) (messageKind, err
 				return nil, err
 			}
 			return &x, nil
+		case EventTypeTemplateCardEveent:
+			var x rxTemplateCardEvent
+			err := xml.Unmarshal(body, &x)
+			if err != nil {
+				return nil, err
+			}
+			return &x, nil
 
 		default:
 			return nil, fmt.Errorf("unknown event '%s'", common.Event)
@@ -356,6 +363,18 @@ func (r *rxEventAddExternalContact) formatInto(w io.Writer) {
 		r.ExternalUserID,
 		r.State,
 		r.WelcomeCode,
+	)
+}
+
+func (r rxTemplateCardEvent) formatInto(w io.Writer) {
+	_, _ = fmt.Fprintf(
+		w,
+		"TaskId: %#v, EventKey: %#v, CardType: %#v, ResponseCode: %#v, SelectedItems: %#v",
+		r.TaskId,
+		r.EventKey,
+		r.CardType,
+		r.ResponseCode,
+		r.SelectedItems,
 	)
 }
 

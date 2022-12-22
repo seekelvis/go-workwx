@@ -22,6 +22,20 @@ type rxMessageCommon struct {
 	ChangeType ChangeType `xml:"ChangeType"`
 }
 
+// rxTemplateCardEvent
+type rxTemplateCardEvent struct {
+	TaskId        string         `xml:"TaskId"`
+	EventKey      string         `xml:"EventKey"`
+	CardType      string         `xml:"CardType"`
+	ResponseCode  string         `xml:"ResponseCode"`
+	SelectedItems []SelectedItem `xml:"SelectedItems>SelectedItem"`
+}
+
+type SelectedItem struct {
+	QuestionKey string   `xml:"QuestionKey"`
+	OptionIds   []string `xml:"OptionIds>OptionId"`
+}
+
 // MessageType 消息类型
 type MessageType string
 
@@ -54,6 +68,9 @@ const EventTypeChangeExternalContact EventType = "change_external_contact"
 
 // EventTypeChangeExternalChat 客户群变更事件
 const EventTypeChangeExternalChat EventType = "change_external_chat"
+
+// EventTypeTemplateCardEveent 模板卡片事件
+const EventTypeTemplateCardEveent EventType = "template_card_event"
 
 // ChangeType 变更类型
 type ChangeType string
